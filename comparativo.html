@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Comparativo Precios EPM — 38 Prestadores</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;600;700&display=swap');
+:root{
+  --bg:#0d1117;--surface:#161b22;--surface2:#21262d;--border:#30363d;
+  --accent:#58a6ff;--green:#3fb950;--red:#f78166;--yellow:#e3b341;--purple:#bc8cff;--cyan:#39d353;
+  --text:#e6edf3;--text2:#8b949e;--font:'IBM Plex Sans',sans-serif;--mono:'IBM Plex Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:13px;min-height:100vh}
+
+/* ── HEADER ── */
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:10px 20px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:200}
+.logo{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:2px;color:var(--accent);background:rgba(88,166,255,.1);border:1px solid rgba(88,166,255,.3);padding:4px 9px;border-radius:4px;white-space:nowrap}
+header h1{font-size:14px;font-weight:700}
+header small{font-size:10px;color:var(--text2);font-family:var(--mono)}
+.hstats{margin-left:auto;display:flex;gap:14px;align-items:center}
+.hstat .v{font-family:var(--mono);font-size:14px;font-weight:700;color:var(--accent);display:block;text-align:right}
+.hstat .l{font-size:9px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;text-align:right}
+
+/* ── VERSION SELECTOR ── */
+.version-bar{background:var(--surface2);border-bottom:1px solid var(--border);padding:8px 20px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.version-bar span{font-size:11px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:1px}
+.ver-btn{background:var(--surface);border:1px solid var(--border);color:var(--text2);padding:5px 12px;border-radius:5px;font-family:var(--font);font-size:11px;font-weight:700;cursor:pointer;transition:all .15s}
+.ver-btn:hover{border-color:var(--accent);color:var(--accent)}
+.ver-btn.active{background:rgba(88,166,255,.1);border-color:var(--accent);color:var(--accent)}
+.ver-btn.compare-active{background:rgba(63,185,80,.08);border-color:var(--green);color:var(--green)}
+.compare-toggle{background:rgba(188,140,255,.08);border:1px solid rgba(188,140,255,.3);color:var(--purple);padding:5px 12px;border-radius:5px;font-family:var(--font);font-size:11px;font-weight:700;cursor:pointer;transition:all .15s}
+.compare-toggle:hover,.compare-toggle.on{background:rgba(188,140,255,.15);border-color:var(--purple)}
+.ver-info{font-family:var(--mono);font-size:10px;color:var(--text2);margin-left:auto}
+
+/* ── TOOLBAR ── */
+.toolbar{display:flex;align-items:center;gap:7px;padding:9px 16px;background:var(--surface);border-bottom:1px solid var(--border);flex-wrap:wrap;position:sticky;top:97px;z-index:100}
+input.search{flex:1;min-width:180px;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:6px 11px;border-radius:6px;font-family:var(--font);font-size:12px}
+input.search:focus{outline:none;border-color:var(--accent)}
+select.filt{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:6px 9px;border-radius:6px;font-family:var(--font);font-size:11px;cursor:pointer}
+select.filt:focus{outline:none;border-color:var(--accent)}
+.fbtn{background:var(--surface2);border:1px solid var(--border);color:var(--text2);padding:5px 9px;border-radius:5px;font-size:10px;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .15s;text-transform:uppercase;letter-spacing:.3px}
+.fbtn:hover{border-color:var(--accent);color:var(--accent)}
+.fbtn.vg{border-color:var(--green);color:var(--green);background:rgba(63,185,80,.08)}
+.fbtn.vy{border-color:var(--yellow);color:var(--yellow);background:rgba(227,179,65,.08)}
+.fbtn.vr{border-color:var(--red);color:var(--red);background:rgba(247,129,102,.08)}
+.export-btn{background:linear-gradient(135deg,#238636,#2ea043);color:#fff;border:none;padding:6px 11px;border-radius:6px;font-family:var(--font);font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;margin-left:auto}
+.export-btn:hover{opacity:.85}
+
+/* ── TABLE ── */
+.table-wrap{overflow:auto;height:calc(100vh - 155px)}
+table{border-collapse:collapse;font-size:11px;width:100%}
+thead th{background:var(--surface);color:var(--text2);font-size:9px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;padding:8px 10px;position:sticky;top:0;z-index:20;border-bottom:2px solid var(--border);white-space:nowrap;cursor:pointer;user-select:none}
+thead th:hover{color:var(--accent)}
+thead th.asc::after{content:' ▲';color:var(--accent)}
+thead th.desc::after{content:' ▼';color:var(--accent)}
+tbody tr{border-bottom:1px solid rgba(48,54,61,.5);cursor:pointer;transition:background .1s}
+tbody tr:hover{background:rgba(255,255,255,.04)}
+tbody tr.exp-row{background:rgba(88,166,255,.04)}
+td{padding:7px 10px;vertical-align:middle}
+
+/* ── CELL TYPES ── */
+.cc{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--accent);white-space:nowrap}
+.ce{font-size:10px;color:var(--purple);white-space:nowrap;max-width:140px;overflow:hidden;text-overflow:ellipsis}
+.cd{max-width:260px;line-height:1.35}
+.csi{color:var(--green);font-size:10px;font-family:var(--mono);font-weight:700}
+.cno{color:var(--red);font-size:10px;font-family:var(--mono)}
+.cnp{font-family:var(--mono);font-size:12px;color:var(--text2)}
+.cmin{color:var(--green);font-weight:700;font-family:var(--mono);white-space:nowrap}
+.cmax{color:var(--red);font-weight:700;font-family:var(--mono);white-space:nowrap}
+.cdiff{font-family:var(--mono);font-size:11px;color:var(--yellow);white-space:nowrap}
+.cpn{font-size:10px;color:var(--text2);max-width:130px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* ── COMPARE DELTA ── */
+.delta-up{color:var(--red);font-family:var(--mono);font-size:10px;font-weight:700}
+.delta-dn{color:var(--green);font-family:var(--mono);font-size:10px;font-weight:700}
+.delta-eq{color:var(--text2);font-family:var(--mono);font-size:10px}
+.delta-new{color:var(--cyan);font-size:9px;font-family:var(--mono);font-weight:700}
+
+/* ── EXPAND DETAIL ── */
+.det-row{display:none}
+.det-row.show{display:table-row}
+.det-row td{background:var(--surface2)!important;padding:10px 16px;border-bottom:2px solid var(--border)}
+.pg{display:flex;flex-wrap:wrap;gap:6px}
+.pc{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:7px 10px;min-width:150px;max-width:190px}
+.pc.mn{border-color:rgba(63,185,80,.5);background:rgba(63,185,80,.04)}
+.pc.mx{border-color:rgba(247,129,102,.5);background:rgba(247,129,102,.04)}
+.pc.new-prest{border-color:rgba(57,211,83,.4);background:rgba(57,211,83,.04)}
+.pc .pn{font-size:10px;color:var(--text2);margin-bottom:3px;line-height:1.2}
+.pc .pt{font-family:var(--mono);font-weight:700;font-size:13px}
+.pc .pd{font-family:var(--mono);font-size:10px;margin-top:2px}
+.pc.mn .pt{color:var(--green)}
+.pc.mx .pt{color:var(--red)}
+.pc .pc2{font-family:var(--mono);font-size:9px;color:var(--purple);margin-top:1px}
+.det-desc{margin-top:8px;font-size:11px;color:var(--text2)}
+
+/* ── COMPARE PANEL ── */
+.compare-panel{background:rgba(188,140,255,.05);border:1px solid rgba(188,140,255,.2);border-radius:8px;padding:10px 14px;margin:8px 0;font-size:11px}
+.compare-panel h4{color:var(--purple);font-size:11px;font-weight:700;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px}
+.cmp-stats{display:flex;gap:16px;flex-wrap:wrap}
+.cmp-stat{text-align:center}
+.cmp-stat .cv{font-family:var(--mono);font-size:15px;font-weight:700;display:block}
+.cmp-stat .cl{font-size:9px;color:var(--text2);text-transform:uppercase;letter-spacing:1px}
+
+/* ── STRIP ── */
+.strip{display:flex;padding:5px 16px;background:var(--bg);border-top:1px solid var(--border);font-size:11px;color:var(--text2);flex-wrap:wrap;gap:2px;position:sticky;bottom:0;z-index:80}
+.si{display:flex;align-items:center;gap:4px;padding:0 9px;border-right:1px solid var(--border);white-space:nowrap}
+.si:first-child{padding-left:0}
+.si:last-child{border-right:none}
+.sn{font-family:var(--mono);font-weight:700}
+.dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.dg{background:var(--green)}.dr2{background:var(--red)}.dy{background:var(--yellow)}.db{background:var(--accent)}.dp{background:var(--purple)}
+
+/* ── LOADER ── */
+#loader{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:999;flex-direction:column;gap:16px}
+.spinner{border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;width:34px;height:34px;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#loaderMsg{font-size:12px;color:var(--text2);font-family:var(--mono)}
+#loaderBar{width:200px;height:3px;background:var(--border);border-radius:2px;overflow:hidden}
+#loaderFill{height:100%;width:0%;background:var(--accent);transition:width .3s;border-radius:2px}
+
+/* ── EMPTY ── */
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:300px;color:var(--text2);gap:10px}
+.empty svg{width:44px;height:44px;opacity:.2}
+.empty p{font-size:13px;text-align:center;line-height:1.6}
+
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+</style>
+</head>
+<body>
+
+<div id="loader">
+  <div class="spinner"></div>
+  <div id="loaderMsg">Cargando manifest...</div>
+  <div id="loaderBar"><div id="loaderFill"></div></div>
+</div>
+
+<header>
+  <a href="index.html" style="display:inline-flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);color:var(--text2);padding:5px 10px;border-radius:5px;font-size:11px;font-weight:600;text-decoration:none;transition:all .15s;margin-right:4px;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text2)'">← Inicio</a><div class="logo">EPM</div>
+  <div>
+    <h1>Comparativo de Precios</h1>
+    <small id="headerSub">Cargando...</small>
+  </div>
+  <div class="hstats">
+    <div class="hstat"><span class="v" id="hReg">—</span><span class="l">Registros</span></div>
+    <div class="hstat"><span class="v" id="hPrest">—</span><span class="l">Prestadores</span></div>
+    <div class="hstat"><span class="v" id="hMostrado">—</span><span class="l">Mostrando</span></div>
+  </div>
+</header>
+
+<!-- Version selector -->
+<div class="version-bar">
+  <span>Versión:</span>
+  <div id="versionBtns"></div>
+  <div style="width:1px;height:20px;background:var(--border);margin:0 4px"></div>
+  <button class="compare-toggle" id="compareToggle" onclick="toggleCompare()" title="Comparar precios entre dos años">⇄ Comparar versiones</button>
+  <select class="filt" id="compareTarget" style="display:none" onchange="loadCompareVersion()">
+    <option value="">— Comparar con... —</option>
+  </select>
+  <div class="ver-info" id="verInfo"></div>
+</div>
+
+<div class="toolbar">
+  <input class="search" id="searchBox" type="text" placeholder="Buscar CUPS, descripción, especialidad..." oninput="scheduleRender()"/>
+  <select class="filt" id="filtEsp" onchange="scheduleRender()">
+    <option value="">— Todas las especialidades —</option>
+  </select>
+  <select class="filt" id="filtPrest" onchange="scheduleRender()">
+    <option value="">— Todos los prestadores —</option>
+  </select>
+  <button class="fbtn vg" id="btnCon" onclick="setVista('con')">Con precio</button>
+  <button class="fbtn" id="btnTodos" onclick="setVista('todos')">Todos</button>
+  <button class="fbtn" id="btnVar" onclick="setVista('var')">Variación</button>
+  <button class="fbtn" id="btnNR" onclick="setVista('nr')">⚠ Fuera resol.</button>
+  <button class="fbtn" id="btnDiff" onclick="setVista('diff')" style="display:none">📊 Con cambio</button>
+  <button class="export-btn" onclick="exportar()">↓ Excel</button>
+</div>
+
+<div class="table-wrap" id="tableWrap">
+  <div class="empty">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 17v-2m3 2v-4m3 4v-6M3 20h18M5 20V8.5L12 3l7 5.5V20"/></svg>
+    <p>Cargando datos...</p>
+  </div>
+</div>
+
+<div class="strip" id="strip" style="display:none">
+  <div class="si"><div class="dot db"></div>Mostrando: <span class="sn" id="sTotal">0</span></div>
+  <div class="si"><div class="dot dg"></div>Con precio: <span class="sn" id="sCon">0</span></div>
+  <div class="si"><div class="dot dy"></div>Variación: <span class="sn" id="sVar">0</span></div>
+  <div class="si"><div class="dot dr2"></div>Fuera resol.: <span class="sn" id="sNR">0</span></div>
+  <div class="si dp" id="siDiff" style="display:none"><div class="dot dp"></div>Con cambio: <span class="sn" id="sDiff">0</span></div>
+  <div class="si" id="siMin" style="display:none">🟢 <span class="sn" style="color:var(--green)" id="sMin"></span></div>
+  <div class="si" id="siMax" style="display:none">🔴 <span class="sn" style="color:var(--red)" id="sMax"></span></div>
+</div>
+
+<script>
+// ── ESTADO ────────────────────────────────────────────────────────────────────
+const BASE = location.hostname === 'localhost' ? '' : '.';
+let MANIFEST   = null;
+let DATA_A     = [];   // versión activa (año seleccionado)
+let DATA_B     = null; // versión comparación
+let COMPARING  = false;
+let VERSION_A  = null;
+let VERSION_B  = null;
+let PRESTADORES = [];
+let ESPECIALIDADES = [];
+let vista   = 'con';
+let sortCol = 'diff';
+let sortDir = 'desc';
+let expanded = null;
+let renderTimer = null;
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+async function init() {
+  try {
+    setLoader('Cargando manifest...', 10);
+    const resp = await fetch('manifest.json');
+    if (!resp.ok) throw new Error('No se encontró manifest.json — ¿ejecutaste scripts/procesar_excel.py?');
+    MANIFEST = await resp.json();
+
+    PRESTADORES    = MANIFEST.prestadores || [];
+    ESPECIALIDADES = MANIFEST.especialidades || [];
+
+    // Poblar filtros
+    const espSel = document.getElementById('filtEsp');
+    ESPECIALIDADES.forEach(e => { const o = document.createElement('option'); o.value=e; o.textContent=e; espSel.appendChild(o); });
+    const pSel = document.getElementById('filtPrest');
+    PRESTADORES.forEach(p => { const o = document.createElement('option'); o.value=p; o.textContent=p; pSel.appendChild(o); });
+
+    // Versiones
+    renderVersionBtns();
+
+    // Cargar versión más reciente por defecto
+    const versiones = MANIFEST.versiones || [];
+    if (versiones.length > 0) {
+      const ultima = versiones[versiones.length - 1];
+      await loadVersion(ultima.anio);
+    }
+
+    document.getElementById('loader').style.display = 'none';
+  } catch(e) {
+    document.getElementById('loaderMsg').textContent = '⚠ ' + e.message;
+    console.error(e);
+  }
+}
+
+function setLoader(msg, pct) {
+  document.getElementById('loaderMsg').textContent = msg;
+  document.getElementById('loaderFill').style.width = pct + '%';
+}
+
+// ── VERSIONES ─────────────────────────────────────────────────────────────────
+function renderVersionBtns() {
+  const container = document.getElementById('versionBtns');
+  const cmpSel    = document.getElementById('compareTarget');
+  container.innerHTML = '';
+  cmpSel.innerHTML = '<option value="">— Comparar con... —</option>';
+
+  (MANIFEST.versiones || []).forEach(v => {
+    const btn = document.createElement('button');
+    btn.className = 'ver-btn' + (v.anio === VERSION_A ? ' active' : '');
+    btn.textContent = v.anio + ' (' + v.registros.toLocaleString('es-CO') + ')';
+    btn.onclick = () => loadVersion(v.anio);
+    container.appendChild(btn);
+
+    const opt = document.createElement('option');
+    opt.value = v.anio; opt.textContent = v.anio;
+    cmpSel.appendChild(opt);
+  });
+}
+
+async function loadVersion(anio) {
+  VERSION_A = anio;
+  DATA_B = null; COMPARING = false;
+  document.getElementById('compareToggle').classList.remove('on');
+  document.getElementById('compareTarget').style.display = 'none';
+  document.getElementById('btnDiff').style.display = 'none';
+  document.getElementById('siDiff').style.display = 'none';
+
+  setLoader('Cargando datos ' + anio + '...', 40);
+  document.getElementById('loader').style.display = 'flex';
+
+  try {
+    DATA_A = await fetchVersionData(anio);
+    const ver = (MANIFEST.versiones || []).find(v => v.anio === anio);
+    document.getElementById('headerSub').textContent =
+      (ver?.prestadores?.length || PRESTADORES.length) + ' Prestadores · Resolución CUPS 2706 de 2025 · SaludEPM';
+    document.getElementById('hPrest').textContent = ver?.prestadores?.length || PRESTADORES.length;
+    document.getElementById('hReg').textContent = DATA_A.length.toLocaleString('es-CO');
+    document.getElementById('verInfo').textContent = 'Actualizado: ' + (MANIFEST.generado ? MANIFEST.generado.slice(0,10) : '—');
+
+    renderVersionBtns();
+    document.getElementById('loader').style.display = 'none';
+    setVista(vista);
+  } catch(e) {
+    document.getElementById('loaderMsg').textContent = 'Error: ' + e.message;
+    console.error(e);
+  }
+}
+
+async function fetchVersionData(anio) {
+  setLoader('Descargando datos ' + anio + '...', 50);
+  const resp = await fetch('data_' + anio + '.json.gz.b64');
+  if (!resp.ok) throw new Error('No se encontró data_' + anio + '.json.gz.b64');
+  const b64  = await resp.text();
+  setLoader('Descomprimiendo...', 75);
+  const bin  = atob(b64);
+  const arr  = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+  const ds     = new DecompressionStream('gzip');
+  const writer = ds.writable.getWriter();
+  const reader = ds.readable.getReader();
+  writer.write(arr); writer.close();
+  const chunks = [];
+  while (true) { const {done,value} = await reader.read(); if(done) break; chunks.push(value); }
+  const total = chunks.reduce((s,c) => s+c.length, 0);
+  const merged = new Uint8Array(total);
+  let off = 0; chunks.forEach(c => { merged.set(c,off); off+=c.length; });
+  setLoader('Parseando...', 90);
+  return JSON.parse(new TextDecoder().decode(merged));
+}
+
+// ── COMPARACIÓN DE VERSIONES ──────────────────────────────────────────────────
+function toggleCompare() {
+  const btn = document.getElementById('compareToggle');
+  const sel = document.getElementById('compareTarget');
+  if (COMPARING) {
+    COMPARING = false; DATA_B = null; VERSION_B = null;
+    btn.classList.remove('on');
+    sel.style.display = 'none';
+    document.getElementById('btnDiff').style.display = 'none';
+    document.getElementById('siDiff').style.display = 'none';
+    scheduleRender();
+  } else {
+    btn.classList.add('on');
+    sel.style.display = '';
+    sel.value = '';
+  }
+}
+
+async function loadCompareVersion() {
+  const sel = document.getElementById('compareTarget');
+  const anio = sel.value;
+  if (!anio || anio === VERSION_A) return;
+  document.getElementById('loader').style.display = 'flex';
+  try {
+    DATA_B     = await fetchVersionData(anio);
+    VERSION_B  = anio;
+    COMPARING  = true;
+    document.getElementById('compareToggle').textContent = '⇄ ' + VERSION_A + ' vs ' + VERSION_B;
+    document.getElementById('btnDiff').style.display = '';
+    document.getElementById('siDiff').style.display  = '';
+    document.getElementById('loader').style.display  = 'none';
+    setVista('diff');
+  } catch(e) {
+    document.getElementById('loaderMsg').textContent = 'Error: ' + e.message;
+  }
+}
+
+// Construir mapa CUPS→precio para comparación rápida
+function buildMap(data) {
+  const m = {};
+  data.forEach(r => { m[r[0]] = r; });
+  return m;
+}
+
+// ── FILTRADO ──────────────────────────────────────────────────────────────────
+function getFiltered() {
+  const search  = document.getElementById('searchBox').value.toLowerCase().trim();
+  const espF    = document.getElementById('filtEsp').value;
+  const prestF  = document.getElementById('filtPrest').value;
+  const mapB    = COMPARING && DATA_B ? buildMap(DATA_B) : null;
+
+  return DATA_A.filter(r => {
+    const [cups, esp,, , er, precios, mn, mx] = r;
+    if (vista==='con'  && Object.keys(precios).length===0) return false;
+    if (vista==='var'  && (Object.keys(precios).length<=1 || mn===mx)) return false;
+    if (vista==='nr'   && er!=='NO') return false;
+    if (vista==='diff' && mapB) {
+      const rB = mapB[cups];
+      if (!rB) return true; // nuevo
+      const mnB = rB[6]; const mnA = mn;
+      if (mnB===null || mnA===null) return false;
+      if (Math.abs(mnA-mnB) < 1) return false;
+      return true;
+    }
+    if (espF  && r[1] !== espF) return false;
+    if (prestF && !precios[prestF]) return false;
+    if (search) {
+      if (!cups.toLowerCase().includes(search) &&
+          !r[2].toLowerCase().includes(search) &&
+          !r[3].toLowerCase().includes(search) &&
+          !(r[1]||'').toLowerCase().includes(search)) return false;
+    }
+    return true;
+  });
+}
+
+function sortRows(rows) {
+  const mapB = COMPARING && DATA_B ? buildMap(DATA_B) : null;
+  return [...rows].sort((a,b) => {
+    let va, vb;
+    if (sortCol==='cups')  { va=a[0]; vb=b[0]; }
+    else if (sortCol==='desc')  { va=a[2]; vb=b[2]; }
+    else if (sortCol==='np')    { va=Object.keys(a[5]).length; vb=Object.keys(b[5]).length; }
+    else if (sortCol==='min')   { va=a[6]??-1; vb=b[6]??-1; }
+    else if (sortCol==='max')   { va=a[7]??-1; vb=b[7]??-1; }
+    else if (sortCol==='diff')  { va=(a[6]!=null&&a[7]!=null)?a[7]-a[6]:-1; vb=(b[6]!=null&&b[7]!=null)?b[7]-b[6]:-1; }
+    else if (sortCol==='delta' && mapB) {
+      const rBa=mapB[a[0]]; const rBb=mapB[b[0]];
+      va = (a[6]!=null && rBa?.[6]!=null) ? a[6]-rBa[6] : 0;
+      vb = (b[6]!=null && rBb?.[6]!=null) ? b[6]-rBb[6] : 0;
+    }
+    if (typeof va==='string') return sortDir==='asc'?va.localeCompare(vb,'es'):vb.localeCompare(va,'es');
+    return sortDir==='asc'?va-vb:vb-va;
+  });
+}
+
+function setVista(v) {
+  vista = v;
+  const map = {con:'vg',var:'vy',nr:'vr',todos:'',diff:'vp'};
+  ['btnCon','btnTodos','btnVar','btnNR','btnDiff'].forEach(id => {
+    const k = id.replace('btn','').toLowerCase();
+    const el = document.getElementById(id);
+    if (el) el.className = 'fbtn' + (k===v&&map[k]?' '+map[k]:'');
+  });
+  scheduleRender();
+}
+
+// ── RENDER ────────────────────────────────────────────────────────────────────
+function scheduleRender() { clearTimeout(renderTimer); renderTimer = setTimeout(_render, 80); }
+
+function _render() {
+  const rows   = getFiltered();
+  const sorted = sortRows(rows);
+  const LIMIT  = 1000;
+  const shown  = sorted.slice(0, LIMIT);
+  const more   = sorted.length - LIMIT;
+  const mapB   = COMPARING && DATA_B ? buildMap(DATA_B) : null;
+  const filtP  = document.getElementById('filtPrest').value;
+
+  // Strip
+  document.getElementById('strip').style.display='flex';
+  const cp = rows.filter(r=>Object.keys(r[5]).length>0).length;
+  const vp = rows.filter(r=>Object.keys(r[5]).length>1&&r[6]!==r[7]).length;
+  const nr = rows.filter(r=>r[4]==='NO').length;
+  document.getElementById('hMostrado').textContent=rows.length.toLocaleString('es-CO');
+  document.getElementById('sTotal').textContent=rows.length.toLocaleString('es-CO');
+  document.getElementById('sCon').textContent=cp.toLocaleString('es-CO');
+  document.getElementById('sVar').textContent=vp.toLocaleString('es-CO');
+  document.getElementById('sNR').textContent=nr.toLocaleString('es-CO');
+
+  if (COMPARING && mapB) {
+    const changed = rows.filter(r=>{ const rB=mapB[r[0]]; return rB&&r[6]!=null&&rB[6]!=null&&Math.abs(r[6]-rB[6])>=1; }).length;
+    document.getElementById('sDiff').textContent=changed.toLocaleString('es-CO');
+  }
+
+  const withP = rows.filter(r=>r[6]!=null);
+  if (withP.length) {
+    const ch = withP.reduce((a,b)=>a[6]<b[6]?a:b);
+    const co = withP.reduce((a,b)=>a[7]>b[7]?a:b);
+    document.getElementById('siMin').style.display='';
+    document.getElementById('siMax').style.display='';
+    document.getElementById('sMin').textContent=ch[0]+' ('+fmt(ch[6])+')';
+    document.getElementById('sMax').textContent=co[0]+' ('+fmt(co[7])+')';
+  } else {
+    document.getElementById('siMin').style.display='none';
+    document.getElementById('siMax').style.display='none';
+  }
+
+  const th = (col, lbl) =>
+    `<th class="${sortCol===col?sortDir:''}" onclick="sortBy('${col}')">${lbl}</th>`;
+
+  let html = `<table><thead><tr>
+    ${th('cups','CUPS')}
+    <th>Especialidad</th>
+    ${th('desc','Descripción')}
+    <th>Res.</th>
+    ${th('np','Prest.')}
+    ${filtP
+      ? `${th('min','Precio')}${COMPARING?th('delta','Δ vs '+VERSION_B):''}`
+      : `${th('min','Mín 🟢')}${th('max','Máx 🔴')}${th('diff','Diferencia')}${COMPARING?th('delta','Δ Mín vs '+VERSION_B):''}`}
+    <th>Más barato</th><th>Más caro</th><th></th>
+  </tr></thead><tbody>`;
+
+  shown.forEach((r, i) => {
+    const [cups, esp, dp, dr, er, precios, mn, mx] = r;
+    const np   = Object.keys(precios).length;
+    const diff = mn!=null&&mx!=null ? mx-mn : null;
+    const pct  = diff!=null&&mn>0 ? ((diff/mn)*100).toFixed(0)+'%' : '';
+    const isExp= expanded===r;
+
+    // Compare delta
+    let deltaHtml = '';
+    if (COMPARING && mapB) {
+      const rB = mapB[cups];
+      if (!rB) {
+        deltaHtml = '<span class="delta-new">NUEVO</span>';
+      } else if (mn!=null && rB[6]!=null) {
+        const d = mn - rB[6];
+        if (Math.abs(d) < 1) deltaHtml = '<span class="delta-eq">—</span>';
+        else if (d > 0) deltaHtml = `<span class="delta-up">▲ ${fmt(d)}</span>`;
+        else deltaHtml = `<span class="delta-dn">▼ ${fmt(Math.abs(d))}</span>`;
+      }
+    }
+
+    const entries = Object.entries(precios);
+    const minProv = entries.length ? entries.reduce((a,b)=>a[1][0]<b[1][0]?a:b)[0] : '';
+    const maxProv = entries.length ? entries.reduce((a,b)=>a[1][0]>b[1][0]?a:b)[0] : '';
+
+    html += `<tr onclick="toggleDet(${i})" class="${isExp?'exp-row':''}">
+      <td><div class="cc">${cups}</div></td>
+      <td><div class="ce" title="${esp}">${esp||'—'}</div></td>
+      <td><div class="cd">${dp||dr}</div></td>
+      <td><span class="${er==='SÍ'?'csi':'cno'}">${er==='SÍ'?'SÍ':'NO'}</span></td>
+      <td><span class="cnp">${np}</span></td>`;
+
+    if (filtP) {
+      const p=precios[filtP];
+      html+=`<td>${p?'<span class="cmin">'+fmt(p[0])+'</span>':'<span style="color:var(--text2)">—</span>'}</td>`;
+      if (COMPARING) html+=`<td>${deltaHtml}</td>`;
+    } else {
+      html+=`<td class="${mn!=null?'cmin':''}">${mn!=null?fmt(mn):'<span style="color:var(--border)">—</span>'}</td>
+             <td class="${mx!=null?'cmax':''}">${mx!=null?fmt(mx):'<span style="color:var(--border)">—</span>'}</td>
+             <td>${diff!=null&&diff>0?`<span class="cdiff">${fmt(diff)}<span style="font-size:10px;color:var(--text2);margin-left:3px">${pct}</span></span>`:diff===0?'<span style="color:var(--green);font-size:10px">Igual</span>':'<span style="color:var(--border)">—</span>'}</td>`;
+      if (COMPARING) html+=`<td>${deltaHtml}</td>`;
+    }
+
+    html+=`<td class="cpn" title="${minProv}">${minProv||'—'}</td>
+           <td class="cpn" title="${maxProv}">${maxProv||'—'}</td>
+           <td style="color:var(--text2);font-size:10px">${isExp?'▲':'▼'}</td>
+    </tr>`;
+
+    // Expand detail
+    html+=`<tr class="det-row ${isExp?'show':''}"><td colspan="${COMPARING?(filtP?7:10):(filtP?5:7)}">`;
+    if (isExp) {
+      // Compare summary panel
+      if (COMPARING && mapB) {
+        const rB = mapB[cups];
+        const mnB = rB?.[6]; const mxB = rB?.[7];
+        html += `<div class="compare-panel">
+          <h4>⇄ Comparación ${VERSION_A} vs ${VERSION_B}</h4>
+          <div class="cmp-stats">
+            <div class="cmp-stat"><span class="cv" style="color:var(--green)">${fmt(mn)}</span><span class="cl">Mín ${VERSION_A}</span></div>
+            <div class="cmp-stat"><span class="cv" style="color:var(--text2)">${mnB!=null?fmt(mnB):'—'}</span><span class="cl">Mín ${VERSION_B||'anterior'}</span></div>
+            ${mn!=null&&mnB!=null?`<div class="cmp-stat"><span class="cv" style="${mn>mnB?'color:var(--red)':'color:var(--green)'}">${mn>mnB?'▲':'▼'} ${fmt(Math.abs(mn-mnB))}</span><span class="cl">Cambio mínimo</span></div>`:''}
+            <div class="cmp-stat"><span class="cv" style="color:var(--red)">${fmt(mx)}</span><span class="cl">Máx ${VERSION_A}</span></div>
+            <div class="cmp-stat"><span class="cv" style="color:var(--text2)">${mxB!=null?fmt(mxB):'—'}</span><span class="cl">Máx ${VERSION_B||'anterior'}</span></div>
+          </div>
+        </div>`;
+      }
+
+      // Provider grid
+      html+=`<div class="pg">`;
+      entries.sort((a,b)=>a[1][0]-b[1][0]).forEach(([pname,[tarifa,cod]])=>{
+        const isMn=tarifa===mn&&mn!==mx;
+        const isMx=tarifa===mx&&mn!==mx;
+        let deltaCard='';
+        if (COMPARING&&mapB) {
+          const rB=mapB[cups];
+          const prB=rB?.[5]?.[pname];
+          if (!prB) deltaCard='<div class="pd" style="color:var(--cyan)">NUEVO ↑</div>';
+          else {
+            const d=tarifa-prB[0];
+            if (Math.abs(d)>=1) deltaCard=`<div class="pd" style="color:${d>0?'var(--red)':'var(--green)'}">${d>0?'▲':'▼'} ${fmt(Math.abs(d))}</div>`;
+          }
+        }
+        const isNew = COMPARING&&mapB&&!mapB[cups]?.[5]?.[pname];
+        html+=`<div class="pc ${isMn?'mn':''} ${isMx?'mx':''} ${isNew?'new-prest':''}">
+          <div class="pn">${pname}</div>
+          <div class="pt">${fmt(tarifa)}</div>
+          ${deltaCard}
+          ${cod?`<div class="pc2">COD: ${cod}</div>`:''}
+        </div>`;
+      });
+      if (entries.length===0) html+=`<span style="color:var(--text2);font-size:11px">Sin precios registrados.</span>`;
+      html+=`</div>`;
+      if (dr&&dr!==dp) html+=`<div class="det-desc">📋 Descripción resolución: <span style="color:var(--text)">${dr}</span></div>`;
+    }
+    html+=`</td></tr>`;
+  });
+
+  html+='</tbody></table>';
+  if (more>0) html+=`<div style="padding:12px 16px;font-size:11px;color:var(--text2);text-align:center;border-top:1px solid var(--border)">Mostrando 1,000 de ${sorted.length.toLocaleString('es-CO')} registros — usa filtros o búsqueda para acotar, o exporta a Excel para verlos todos.</div>`;
+
+  document.getElementById('tableWrap').innerHTML = html;
+  document.getElementById('tableWrap').scrollTop = 0;
+}
+
+function toggleDet(i) {
+  const rows = sortRows(getFiltered());
+  const r = rows[i];
+  expanded = expanded===r ? null : r;
+  _render();
+}
+
+function sortBy(col) {
+  if (sortCol===col) sortDir=sortDir==='asc'?'desc':'asc';
+  else { sortCol=col; sortDir=['diff','max','np','delta'].includes(col)?'desc':'asc'; }
+  scheduleRender();
+}
+
+function fmt(v) {
+  if (v==null||isNaN(v)) return '—';
+  return '$'+Math.round(v).toLocaleString('es-CO');
+}
+
+// ── EXPORTAR ──────────────────────────────────────────────────────────────────
+function exportar() {
+  const rows  = sortRows(getFiltered());
+  const mapB  = COMPARING && DATA_B ? buildMap(DATA_B) : null;
+  const script = document.createElement('script');
+  script.src   = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+  script.onload = () => {
+    const wb = XLSX.utils.book_new();
+    const p  = PRESTADORES;
+    const headers = ['CUPS','Especialidad','Descripción','Desc. Resolución','En Resol.','# Prest.','Precio Mín','Precio Máx','Diferencia','% Var','Más barato','Más caro',
+      ...(mapB?['Mín '+VERSION_B,'Máx '+VERSION_B,'Δ Mín ($)','Δ Mín (%)']:[]), ...p];
+    const data = [headers];
+    rows.forEach(r => {
+      const [cups,esp,dp,dr,er,precios,mn,mx] = r;
+      const ent = Object.entries(precios);
+      const diff = mn!=null&&mx!=null?mx-mn:null;
+      const pct  = diff!=null&&mn>0?+(diff/mn*100).toFixed(2):null;
+      const minP = ent.length?ent.reduce((a,b)=>a[1][0]<b[1][0]?a:b)[0]:'';
+      const maxP = ent.length?ent.reduce((a,b)=>a[1][0]>b[1][0]?a:b)[0]:'';
+      const row  = [cups,esp,dp,dr,er,ent.length,mn??'',mx??'',diff??'',pct??'',minP,maxP];
+      if (mapB) {
+        const rB=mapB[cups];
+        const mnB=rB?.[6]??''; const mxB=rB?.[7]??'';
+        const delta=mn!=null&&rB?.[6]!=null?mn-rB[6]:'';
+        const deltaPct=typeof delta==='number'&&rB[6]>0?+(delta/rB[6]*100).toFixed(2):'';
+        row.push(mnB,mxB,delta,deltaPct);
+      }
+      p.forEach(pn => row.push(precios[pn]?precios[pn][0]:''));
+      data.push(row);
+    });
+    const ws = XLSX.utils.aoa_to_sheet(data);
+    ws['!cols'] = [{wch:10},{wch:22},{wch:52},{wch:52},{wch:8},{wch:8},{wch:14},{wch:14},{wch:14},{wch:8},{wch:22},{wch:22},...(mapB?[{wch:14},{wch:14},{wch:12},{wch:10}]:[]),...p.map(()=>({wch:16}))];
+    XLSX.utils.book_append_sheet(wb, ws, 'Comparativo');
+    const fname = COMPARING ? `Comparativo_EPM_${VERSION_A}_vs_${VERSION_B}.xlsx` : `Comparativo_EPM_${VERSION_A||''}.xlsx`;
+    XLSX.writeFile(wb, fname);
+  };
+  document.head.appendChild(script);
+}
+
+init();
+</script>
+</body>
+</html>
